@@ -4,13 +4,16 @@ const userRoutes = require("./routes/user");
 const blogRoutes = require("./routes/blog");
 const logger = require("./middlewares/logger");
 const auth = require("./middlewares/auth");
+require('dotenv').config();
+
 
 const app = express();
 app.use(express.json());
-const PORT = 7002;
+const PORT = process.env.PORT || 7002;
+console.log(`This is the port, ${PORT}`)
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/blog")
+  .connect(process.env.DB_URI)
   .then(() => console.log("MongoDB connected successfully"));
 
 app.use(logger);
