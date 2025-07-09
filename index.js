@@ -21,7 +21,7 @@ app.use("/auth", userRoutes);
 app.use("/blog", auth, blogRoutes);
 
 app.get("/", (req, res, next) => {
-  const responseText = `<b>Request time : ${req.requestTime}<b>`;
+  const responseText = `OK`;
   res.send(responseText);
   next();
 });
