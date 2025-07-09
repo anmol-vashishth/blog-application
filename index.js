@@ -7,7 +7,7 @@ const logger = require("./middlewares/logger");
 const auth = require("./middlewares/auth");
 require('dotenv').config();
 
-app.use(cors());
+app.use(cors({origin: "*"}));
 
 
 const app = express();
