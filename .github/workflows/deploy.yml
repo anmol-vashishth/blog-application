@@ -10,39 +10,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '22'
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
 
-    - name: Deploy to EC2 via SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          mkdir -p ~/app
-          cd ~/app
-          
-          if [ ! -d ".git" ]; then
-            git clone https://github.com/anmol-vashishth/blog-application.git .
-          else
-            git pull
-          fi
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Ensure app directory
+            mkdir -p ~/app
+            cd ~/app
 
-          /home/ubuntu/.nvm/versions/node/v22.17.0/bin/npm install
+            # Clone or update repo
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/anmol-vashishth/blog-application.git .
+            else
+              git fetch origin master
+              git reset --hard origin/master
+            fi
 
-          echo "DB_URI=${{ secrets.DB_URI }}" > .env
-          echo "PORT=${{ secrets.PORT }}" >> .env
+            # Load NVM and use Node 22
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm use 22
 
-          /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pm2 start index.js \
-            --name "node-app" \
-            --interpreter /home/ubuntu/.nvm/versions/node/v22.17.0/bin/node \
-            --update-env || \
-          /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pm2 restart node-app \
-            --update-env \
-            --interpreter /home/ubuntu/.nvm/versions/node/v22.17.0/bin/node
+            # Install dependencies
+            npm install
+
+            # Write environment variables
+            echo "DB_URI=${{ secrets.DB_URI }}" > .env
+            echo "PORT=${{ secrets.PORT }}" >> .env
+
+            # Start or reload app with PM2
+            pm2 reload node-app --update-env || \
+            pm2 start index.js --name "node-app" --update-env
+
+            # Save PM2 process list to resurrect on reboot
+            pm2 save
