@@ -1,0 +1,48 @@
+name: Deploy Node.js App to EC2
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22'
+
+    - name: Deploy to EC2 via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          # Make sure directory exists
+          mkdir -p ~/app
+          cd ~/app
+
+          # Clone repo if not exists
+          if [ ! -d ".git" ]; then
+            git clone https://github.com/${{ github.repository }} .
+          else
+            git pull
+          fi
+
+          # Install dependencies
+          npm install
+
+          # Create or update .env file
+          echo "DB_URI=${{ secrets.DB_URI }}" > .env
+          echo "PORT=${{ secrets.PORT }}" >> .env
+
+          # Restart app with PM2
+          pm2 stop all || true
+          pm2 start index.js --name "node-app"
