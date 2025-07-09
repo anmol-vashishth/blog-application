@@ -7,10 +7,12 @@ const logger = require("./middlewares/logger");
 const auth = require("./middlewares/auth");
 require('dotenv').config();
 
-app.use(cors({origin: "*"}));
+
 
 
 const app = express();
+
+app.use(cors({origin: "*"}));
 app.use(express.json());
 const PORT = process.env.PORT || 7002;
 console.log(`This is the port, ${PORT}`)
