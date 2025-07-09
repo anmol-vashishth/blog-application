@@ -25,5 +25,4 @@ app.get("/", (req, res, next) => {
   res.send(responseText);
   next();
 });
-
 app.listen(PORT, () => console.log(`Server reunning on port ${PORT}`));
