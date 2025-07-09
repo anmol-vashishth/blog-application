@@ -22,3 +22,4 @@ const blog = new mongoose.Schema(
 const Blog = mongoose.model("Blog", blog);
 
 module.exports = Blog;
+
