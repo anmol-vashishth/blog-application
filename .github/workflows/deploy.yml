@@ -39,9 +39,6 @@ jobs:
           echo "DB_URI=${{ secrets.DB_URI }}" > .env
           echo "PORT=${{ secrets.PORT }}" >> .env
 
-          /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pm2 start index.js \
+          pm2 start index.js \
             --name "node-app" \
-            --interpreter /home/ubuntu/.nvm/versions/node/v22.17.0/bin/node \
-            || /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pm2 restart "node-app" \
             --update-env \
-            --interpreter /home/ubuntu/.nvm/versions/node/v22.17.0/bin/node
