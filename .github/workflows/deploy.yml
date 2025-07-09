@@ -25,24 +25,15 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # Make sure directory exists
           mkdir -p ~/app
           cd ~/app
-
-          # Clone repo if not exists
           if [ ! -d ".git" ]; then
             git clone https://github.com/anmol-vashishth/blog-application.git .
           else
             git pull
           fi
 
-          # Install dependencies
-          npm install
-
-          # Create or update .env file
+          /home/ubuntu/.nvm/versions/node/v22.17.0/bin/npm install
           echo "DB_URI=${{ secrets.DB_URI }}" > .env
           echo "PORT=${{ secrets.PORT }}" >> .env
-
-          # Restart app with PM2
-          pm2 stop all || true
-          pm2 start index.js --name "node-app"
+          /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pm2 start index.js --name "node-app" || /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pm2 restart "node-app"
